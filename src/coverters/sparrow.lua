@@ -1,4 +1,6 @@
 -- converts the sparrow V2 atlas format into a lua table I think
+-- OH MY FUCKING GOD THIS FORMAT SUCKS ASS, I HATE IT AHHHH
+-- thank god lua allows me to do stupid shit like this
 
 local function raw(string)
 	return function(key, list)
@@ -20,13 +22,27 @@ return function(path, save_to)
 
 	local frames = {
 		texture = raw("texture"),
+		tags = {}
 	}
+
+	table.sort(data.children[1].children, function (a, b)
+		return a.attrs.name < b.attrs.name -- oh right I forgot this language is goated
+	end)
+
+	-- no way fnf monsters of monsters reference
+	-- used to index the first instance of a frame so it can be used in 
+	local first_instance = {}
 
 	for index, value in ipairs(data.children[1].children) do --data.children[1].children
 		value = value.attrs
 		local frame = {}
 
-		frame.name = value.name
+		local sub_num = value.name:sub(0, #value.name - 4)
+		if frames.tags[sub_num] == nil then
+			frames.tags[sub_num] = {}
+		end
+
+		local tag = frames.tags[sub_num]
 
 		if value.flipX then
 			frame.flipX = value.flipX or false
@@ -57,10 +73,21 @@ return function(path, save_to)
 			frame.rotation = rotated and math.rad(270) or 0
 		end
 
+		local key = value.x..value.y..value.width..value.height..size[1]..size[2]..size[3]..size[4]
+		if first_instance[key] then
+			goto atomic_rizzler
+		else
+			first_instance[key] = #frames+1
+		end
+		
 		frame.offset = raw("{"..size[1]..", "..size[2].."}")
 		frame.quad = raw(makeQuad(value.x, value.y, value.width, value.height))
-
+		
 		table.insert(frames, frame)
+
+		::atomic_rizzler::
+
+		table.insert(tag, first_instance[key])
 	end
 
 	export:write("return " .. serialize_list(frames))
@@ -69,3 +96,5 @@ return function(path, save_to)
 	export:close()
 	export:release()
 end
+
+-- offtopic but vs sonic (rewrite) round 2 is pretty cool
