@@ -1,0 +1,139 @@
+-- well come to hell (the main file)
+
+do -- setting up default require paths
+	local paths = love.filesystem.getRequirePath()
+
+	paths = "src/?.lua;src/?/init.lua;" -- src path
+	.. "src/lib/?.lua;src/lib/?/init.lua;" -- lib paths
+	.. paths -- chances are we are going to require from anywhere else the least so it's fine
+
+	love.filesystem.setRequirePath(paths)
+end
+
+_G.object = require("classic")
+
+_G.sprite = require("backend.sprite")
+_G.text = require("backend.text")
+
+_G.audio = require("backend.audio")
+
+_G.parsers = {
+	json = require("json"),
+	xml = require("xml")
+}
+
+_G.converters = {
+	sparrow = require("coverters.sparrow")
+}
+
+--edited version of https://stackoverflow.com/a/65632110/21846847
+function serialize_list(list)
+	local str = ''
+	str = str .. "{"
+	for key, value in pairs(list) do
+		local pr = (type(key) == "string") and ('["'..key..'"] = ') or ""
+
+		if type(value) == "table" then
+			str = str..pr..serialize_list(value)..', '
+		elseif type(value) == "function" then
+			str = str..pr..value(list, key)..', '
+		elseif type(value) == "string" then
+			if tonumber(value) ~= nil then
+				str = str..pr..'"'..tonumber(value)..'", '			
+			else
+				str = str..pr..'"'..tostring(value)..'", '
+			end
+		else
+			str = str..pr..tostring(value)..', '
+		end
+	end
+
+	str = str:sub(1, #str-2) -- remove last symbols
+	str = str.."}"
+	return str
+end
+
+local test
+
+local x = 0
+local y = 0
+local zoom = 1
+
+local c_x = 0
+local c_y = 0
+
+function love.load()
+	love.filesystem.setIdentity("colorsin_testing")
+
+	converters.sparrow("normal.xml", "soft.lua")
+
+	test = sprite:new(0, 0, love.graphics.newImage("normal.png"))
+	test:loadFrames("soft.lua")
+end
+
+local left_last_frame = false
+local right_last_frame = false
+function love.update()
+	c_x, c_y = love.graphics.inverseTransformPoint(love.graphics.getWidth() * 0.5,love.graphics.getHeight() * 0.5)
+
+	if love.keyboard.isDown("left") then
+		if not left_last_frame then 
+			updateIndex(-1, #test.frames)
+		end
+		left_last_frame = true
+	else
+		left_last_frame = false
+	end
+
+	if love.keyboard.isDown("right") then
+		if not right_last_frame then 
+			updateIndex(1, #test.frames)
+		end
+		right_last_frame = true
+	else
+		right_last_frame = false
+	end
+end
+
+function love.keypressed(key, scancode)
+	
+end
+
+function love.wheelmoved(x, y)
+	zoom = zoom + (y * 0.05)
+end
+
+function love.mousemoved(_x, _y, dx, dy, istouch)
+	if love.mouse.isDown(3) then
+		x, y = x + dx, y + dy
+	end
+end
+
+local curIdx = 1
+function updateIndex(val, length)
+	curIdx = curIdx + val
+
+	if (curIdx < 1) then
+		curIdx = curIdx + (length - 1)
+	elseif (curIdx >= length) then
+		curIdx = curIdx % (length - 1)
+	end
+
+	test:setFrame(curIdx)
+end
+
+function love.draw()
+	local graphics = love.graphics ---@type love.graphics
+
+	graphics.clear(0.5, 0.5, 0.5, 1)
+	graphics.push()
+
+	graphics.translate(c_x, c_y)
+	graphics.scale(zoom)
+	graphics.translate(-c_x, -c_y)
+	graphics.translate(x, y)
+
+	test:render()
+
+	graphics.pop()
+end
