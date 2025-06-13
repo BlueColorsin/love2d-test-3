@@ -155,14 +155,10 @@ function love.draw()
 	c_x, c_y = graphics.inverseTransformPoint(love.graphics.getWidth()*0.5, love.graphics.getHeight()*0.5)
 
 	graphics.translate(c_x, c_y)
-		if fuckedUp then
-
-			-- graphics.rotate(-test.angle)
-		end
 		graphics.scale(zoom)
 	graphics.translate(-c_x, -c_y)
 
-	local _x, _y = graphics.inverseTransformPoint(love.mouse.getPosition())
+	local _x, _y = graphics.inverseTransformPoint(love.mouse.getGlobalPosition())
 	if love.mouse.isDown(3) then
 		local dx, dy = (_x - last_x), (_y - last_y)
 		x, y = x + dx, y + dy

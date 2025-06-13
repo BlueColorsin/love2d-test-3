@@ -16,7 +16,7 @@ return function(path, save_to)
 	local file = love.filesystem.read(path)
 	local data = parsers.xml.parse(file)
 
-	local export = love.filesystem.newFile(save_to, "w")
+	local export = love.filesystem.openFile(save_to, "w")
 
 	export:write("local texture = " .. "({...})[1]" .. " ")
 	export:write("local quad = love.graphics.newQuad ")
