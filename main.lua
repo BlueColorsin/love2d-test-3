@@ -12,6 +12,10 @@ end
 
 _G.object = require("classic")
 
+_G.util = {
+	point = require("backend.point")
+}
+
 _G.animation = require("backend.animation")
 _G.sprite = require("backend.sprite")
 
@@ -66,29 +70,53 @@ local c_x, c_y = 0, 0
 function love.load()
 	love.filesystem.setIdentity("colorsin_testing")
 
-	converters.sparrow("normal.xml", "soft.lua")
+	converters.sparrow("BOYFRIEND.xml", "BOYFRIEND.lua")
 
-	test = sprite:new(0, 0, love.graphics.newImage("normal.png")) ---@type sprite
-	-- test:loadFrames("soft.lua")
-	-- test.animation:addByTag("idle", "BF idle dance", 24, true)
-	-- test.animation:play("idle")
+	test = sprite:new(0, 0, love.graphics.newImage("BOYFRIEND.png")) ---@type sprite
+	test:loadFrames("BOYFRIEND.lua")
+	test.animation:addByTag("idle"     , "BF idle dance", 24, false, {-5 ,  0})
+	test.animation:addByTag("singLEFT" , "BF NOTE LEFT" , 24, false, { 5 , -6})
+	test.animation:addByTag("singDOWN" , "BF NOTE DOWN" , 24, false, {-20, -51})
+	test.animation:addByTag("singUP"   , "BF NOTE UP"   , 24, false, {-46,  27})
+	test.animation:addByTag("singRIGHT", "BF NOTE RIGHT", 24, false, {-48, -7})
+	
+	test.animation:play("idle")
 
 	love.graphics.setNewFont(18)
 
 	print()
 end
 
+local fuckedUp = false
+
+local elapsed = 0
 function love.update(dt)
 	test:update(dt)
+
+	if fuckedUp then
+		elapsed = elapsed + dt
+		-- test:set("shear", math.sin(elapsed), math.sin(elapsed))
+		test.angle = test.angle + math.rad(90) * dt
+	end
 end
 
 function love.keypressed(key, scancode, isrepeat)
 	if isrepeat then return end
 
+	if key == "backspace" then
+		fuckedUp = not fuckedUp
+	end
+
 	if key == "left" then
-		updateIndex(-1, #test.frames)
+		test.animation:play("singLEFT", true)
 	elseif key == "right" then
-		updateIndex(1, #test.frames)
+		test.animation:play("singRIGHT", true)
+	elseif key == "down" then
+		test.animation:play("singDOWN", true)
+	elseif key == "up" then
+		test.animation:play("singUP", true)
+	elseif key == "space" then
+		test.animation:play("idle", true)
 	end
 end
 
@@ -127,6 +155,10 @@ function love.draw()
 	c_x, c_y = graphics.inverseTransformPoint(love.graphics.getWidth()*0.5, love.graphics.getHeight()*0.5)
 
 	graphics.translate(c_x, c_y)
+		if fuckedUp then
+
+			-- graphics.rotate(-test.angle)
+		end
 		graphics.scale(zoom)
 	graphics.translate(-c_x, -c_y)
 

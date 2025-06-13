@@ -11,22 +11,21 @@ local templateAnimation = {
 	flipY = false
 }
 
-local function set_index(self, index)
-	self._index = index
-	self.parent:setFrame(self.currentAnimation.frames[index])
-end
-
 function animation:_new(parent)
 	self.parent = parent
 	self.frames = parent.frames
 
 	self.currentAnimation = nil
+	self.animationName = ""
 
 	self.animTimer = 0
 	self.playing = false
+	self.finished = false
 
-	self.animationName = ""
+	self.onFinish = nil
+	self.onFrameChange = nil
 
+	-- just stop the controller and manually change the offset 
 	self._index = 1
 
 	self.animations = {}
@@ -70,6 +69,11 @@ function animation:add(name, frames, fps, loop, offset, flipX, flipY)
 	}
 end
 
+local function set_index(self, index)
+	self._index = index
+	self.parent:setFrame(self.currentAnimation.frames[index])
+end
+
 function animation:update(dt)
 	if self.playing then
 		self.animTimer = self.animTimer + dt
@@ -86,6 +90,7 @@ function animation:update(dt)
 			set_index(self, 1)
 		else
 			self.playing = false
+			self.finished = true
 			--callback
 		end
 
@@ -100,7 +105,17 @@ function animation:play(tag, forced, startFrame)
 	self.currentAnimation = self.animations[tag]
 	self.animationName = tag
 	set_index(self, startFrame or 1)
+
 	self.playing = true
+	self.finished = false
+end
+
+function animation:release()
+	for key, value in pairs(self) do
+		rawset(self, key, nil)
+	end
+
+	self = nil
 end
 
 return animation

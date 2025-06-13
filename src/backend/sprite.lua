@@ -1,4 +1,5 @@
 local sprite = object:extend() ---@class sprite:object
+sprite:implement(util.point)
 
 -- I LOVE TURNINATIRES!
 
@@ -86,8 +87,15 @@ function sprite:render()
 		frame = self.currentFrame
 		--relies that the spritesheet has the right angled offset
 		transform:translate(frame.offset[1], frame.offset[2])
+
 		if frame.angle then
 			transform:rotate(frame.angle)
+		end
+
+		local anim = self.animation.currentAnimation
+		if anim.offset then
+			-- the offset is BROKEN at angles for some unFORSAKEN reason
+			transform:translate(-anim.offset[1], -anim.offset[2])
 		end
 	end
 
@@ -101,7 +109,19 @@ function sprite:render()
 end
 
 function sprite:release()
+	self.animation:release()
 	self.transform:release()
+	self.graphic:release()
+
+	for key, value in pairs(self.frames) do
+		value.quad:release()
+	end
+
+	for key, value in pairs(self) do
+		rawset(self, key, nil)
+	end
+
+	self = nil
 end
 
 return sprite
