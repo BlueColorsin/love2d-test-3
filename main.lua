@@ -120,7 +120,7 @@ local last_x, last_y = 0, 0
 function love.draw()
 	local graphics = love.graphics ---@type love.graphics
 	
-	-- use this as the basis for the camera render later 
+	-- use this as the basis for the camera renderer later 
 	graphics.push()
 	graphics.clear(0.5, 0.5, 0.5, 1)
 
@@ -130,12 +130,12 @@ function love.draw()
 		graphics.scale(zoom)
 	graphics.translate(-c_x, -c_y)
 
+	local _x, _y = graphics.inverseTransformPoint(love.mouse.getPosition())
 	if love.mouse.isDown(3) then
-		local _x, _y = graphics.inverseTransformPoint(love.mouse.getPosition())
 		local dx, dy = (_x - last_x), (_y - last_y)
 		x, y = x + dx, y + dy
 	end
-	last_x, last_y = love.mouse.getPosition()
+	last_x, last_y = _x, _y
 
 	graphics.translate(x, y)
 
