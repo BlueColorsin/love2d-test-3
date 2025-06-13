@@ -3,16 +3,10 @@ local sprite = object:extend() ---@class sprite:object
 -- I LOVE TURNINATIRES!
 
 function sprite:_new(x, y, graphic)
-	self.x = x or 0
-	self.y = y or 0
-
 	self.graphic = graphic or nil ---@type love.Image
 
-	self.animation = true -- I lowk gotta shake that belly!
-
-	self.frames = {}
-
-	self.transform = love.math.newTransform() ---@type love.Transform
+	self.x = x or 0
+	self.y = y or 0
 
 	self.width = self.graphic:getWidth()
 	self.height = self.graphic:getHeight()
@@ -23,6 +17,12 @@ function sprite:_new(x, y, graphic)
 	self.scale = {1, 1}
 	self.shear = {0, 0}
 
+	self.transform = love.math.newTransform() ---@type love.Transform
+
+	--animation bullshit that is nil by default because not everything is animated
+	self.animation = nil -- I lowk gotta shake that belly!
+
+	self.frames = nil
 	self.currentFrame = nil
 	self.frameIndex = nil
 end

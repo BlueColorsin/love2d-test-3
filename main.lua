@@ -70,6 +70,8 @@ function love.load()
 	test:loadFrames("soft.lua")
 
 	love.graphics.setNewFont(18)
+
+	print()
 end
 
 function love.update(dt)
@@ -92,7 +94,7 @@ end
 
 function love.mousemoved(_x, _y, dx, dy, istouch)
 	if love.mouse.isDown(3) then
-		x, y = x + dx, y + dy
+		-- x, y = x + dx, y + dy
 	end
 end
 
@@ -109,6 +111,8 @@ function updateIndex(val, length)
 	test:setFrame(curIdx)
 end
 
+local last_x, last_y = 0, 0
+
 function love.draw()
 	local graphics = love.graphics ---@type love.graphics
 	
@@ -120,13 +124,21 @@ function love.draw()
 
 	graphics.translate(c_x, c_y)
 		graphics.scale(zoom)
-	graphics.translate(-(c_x), -(c_y))
+	graphics.translate(-c_x, -c_y)
 
-	graphics.translate(graphics.inverseTransformPoint(x, y))
+	if love.mouse.isDown(3) then
+		local _x, _y = graphics.inverseTransformPoint(love.mouse.getPosition())
+		local dx, dy = (_x - last_x), (_y - last_y)
+		x, y = x + dx, y + dy
+	end
+	last_x, last_y = love.mouse.getPosition()
+
+	graphics.translate(x, y)
 
 	test:render()
 
 	graphics.pop()
 
+	graphics.print(x.."|"..y, 0, 100)
 	graphics.print("zoom :" .. math.floor((zoom * 100)) * 0.01)
 end
