@@ -59,8 +59,7 @@ local x = 0
 local y = 0
 local zoom = 1
 
-local c_x = 0
-local c_y = 0
+local c_x, c_y = 0, 0
 
 function love.load()
 	love.filesystem.setIdentity("colorsin_testing")
@@ -88,7 +87,7 @@ function love.keypressed(key, scancode, isrepeat)
 end
 
 function love.wheelmoved(x, y)
-	zoom = zoom + y * (0.15 * zoom)
+	zoom = zoom + y * 0.1
 end
 
 function love.mousemoved(_x, _y, dx, dy, istouch)
@@ -110,19 +109,18 @@ function updateIndex(val, length)
 	test:setFrame(curIdx)
 end
 
-local last_x, last_y = 0, 0
-
 function love.draw()
 	local graphics = love.graphics ---@type love.graphics
-
-	graphics.clear(0.5, 0.5, 0.5, 1)
+	
+	-- use this as the basis for the camera render later 
 	graphics.push()
+	graphics.clear(0.5, 0.5, 0.5, 1)
 
-	c_x, c_y = graphics.inverseTransformPoint(love.graphics.getWidth() * 0.5,love.graphics.getHeight() * 0.5)
+	c_x, c_y = graphics.inverseTransformPoint(love.graphics.getWidth()*0.5, love.graphics.getHeight()*0.5)
 
 	graphics.translate(c_x, c_y)
-	graphics.scale(zoom)
-	graphics.translate(-c_x, -c_y)
+		graphics.scale(zoom)
+	graphics.translate(-(c_x), -(c_y))
 
 	graphics.translate(graphics.inverseTransformPoint(x, y))
 
