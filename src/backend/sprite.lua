@@ -20,7 +20,8 @@ function sprite:_new(x, y, graphic)
 	self.transform = love.math.newTransform() ---@type love.Transform
 
 	--animation bullshit that is nil by default because not everything is animated
-	self.animation = nil -- I lowk gotta shake that belly!
+	 -- I lowk gotta shake that belly!
+	self.animation = nil ---@type animation
 
 	self.frames = nil
 	self.currentFrame = nil
@@ -58,13 +59,15 @@ function sprite:loadFrames(path)
 	end
 
 	self.frames = frames
+	self.animation = animation:new(self)
 
-	-- setup animation shit here
 	self:setFrame(1)
 end
 
 function sprite:update(dt)
-
+	if self.animation then
+		self.animation:update(dt)
+	end
 end
 
 function sprite:render()

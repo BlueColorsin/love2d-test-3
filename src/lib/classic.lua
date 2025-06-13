@@ -50,6 +50,8 @@ function object:__tostring()
 	return "Object"
 end
 
+---@generic T : table
+---@return T
 function object:new(...)
 	local obj = setmetatable({}, self)
 	obj:_new(...)

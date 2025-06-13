@@ -12,7 +12,9 @@ end
 
 _G.object = require("classic")
 
+_G.animation = require("backend.animation")
 _G.sprite = require("backend.sprite")
+
 _G.text = require("backend.text")
 
 _G.audio = require("backend.audio")
@@ -66,8 +68,10 @@ function love.load()
 
 	converters.sparrow("normal.xml", "soft.lua")
 
-	test = sprite:new(0, 0, love.graphics.newImage("normal.png"))
-	test:loadFrames("soft.lua")
+	test = sprite:new(0, 0, love.graphics.newImage("normal.png")) ---@type sprite
+	-- test:loadFrames("soft.lua")
+	-- test.animation:addByTag("idle", "BF idle dance", 24, true)
+	-- test.animation:play("idle")
 
 	love.graphics.setNewFont(18)
 
