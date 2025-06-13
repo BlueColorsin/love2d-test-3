@@ -9,7 +9,7 @@ local function raw(string)
 end
 
 local function makeQuad(x, y, width, height)
-	return "love.graphics.newQuad("..x..", "..y..", "..width..", "..height..", texture)"
+	return "quad("..x..", "..y..", "..width..", "..height..", texture)"
 end
 
 return function(path, save_to)
@@ -19,6 +19,7 @@ return function(path, save_to)
 	local export = love.filesystem.newFile(save_to, "w")
 
 	export:write("local texture = " .. "({...})[1]" .. " ")
+	export:write("local quad = love.graphics.newQuad ")
 
 	local frames = {
 		texture = raw("texture"),
@@ -70,19 +71,19 @@ return function(path, save_to)
 		size[1], size[2] = -size[1], -size[2]
 		if rotated then
 			size[2] = size[2] + value.width
-			frame.rotation = rotated and math.rad(270) or 0
+			frame.angle = rotated and math.rad(270) or 0
 		end
 
 		local key = value.x..value.y..value.width..value.height..size[1]..size[2]..size[3]..size[4]
-		if first_instance[key] then
-			goto atomic_rizzler
-		else
+		if not first_instance[key] then
 			first_instance[key] = #frames+1
+		else
+			goto atomic_rizzler
 		end
-		
+
 		frame.offset = raw("{"..size[1]..", "..size[2].."}")
 		frame.quad = raw(makeQuad(value.x, value.y, value.width, value.height))
-		
+
 		table.insert(frames, frame)
 
 		::atomic_rizzler::

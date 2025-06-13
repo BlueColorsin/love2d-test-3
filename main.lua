@@ -69,38 +69,26 @@ function love.load()
 
 	test = sprite:new(0, 0, love.graphics.newImage("normal.png"))
 	test:loadFrames("soft.lua")
+
+	love.graphics.setNewFont(18)
 end
 
-local left_last_frame = false
-local right_last_frame = false
-function love.update()
-	c_x, c_y = love.graphics.inverseTransformPoint(love.graphics.getWidth() * 0.5,love.graphics.getHeight() * 0.5)
-
-	if love.keyboard.isDown("left") then
-		if not left_last_frame then 
-			updateIndex(-1, #test.frames)
-		end
-		left_last_frame = true
-	else
-		left_last_frame = false
-	end
-
-	if love.keyboard.isDown("right") then
-		if not right_last_frame then 
-			updateIndex(1, #test.frames)
-		end
-		right_last_frame = true
-	else
-		right_last_frame = false
-	end
+function love.update(dt)
+	test:update(dt)
 end
 
-function love.keypressed(key, scancode)
-	
+function love.keypressed(key, scancode, isrepeat)
+	if isrepeat then return end
+
+	if key == "left" then
+		updateIndex(-1, #test.frames)
+	elseif key == "right" then
+		updateIndex(1, #test.frames)
+	end
 end
 
 function love.wheelmoved(x, y)
-	zoom = zoom + (y * 0.05)
+	zoom = zoom + y * (0.15 * zoom)
 end
 
 function love.mousemoved(_x, _y, dx, dy, istouch)
@@ -122,18 +110,25 @@ function updateIndex(val, length)
 	test:setFrame(curIdx)
 end
 
+local last_x, last_y = 0, 0
+
 function love.draw()
 	local graphics = love.graphics ---@type love.graphics
 
 	graphics.clear(0.5, 0.5, 0.5, 1)
 	graphics.push()
 
+	c_x, c_y = graphics.inverseTransformPoint(love.graphics.getWidth() * 0.5,love.graphics.getHeight() * 0.5)
+
 	graphics.translate(c_x, c_y)
 	graphics.scale(zoom)
 	graphics.translate(-c_x, -c_y)
-	graphics.translate(x, y)
+
+	graphics.translate(graphics.inverseTransformPoint(x, y))
 
 	test:render()
 
 	graphics.pop()
+
+	graphics.print("zoom :" .. math.floor((zoom * 100)) * 0.01)
 end
