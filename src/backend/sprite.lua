@@ -14,9 +14,13 @@ function sprite:_new(x, y, graphic)
 
 	self.origin = {self.width/2, self.height/2}
 
+	self.offset = {1, 1}
+
 	self.angle = 0
 	self.scale = {1, 1}
 	self.shear = {0, 0}
+
+	self.scrollFactor = {}
 
 	self.transform = love.math.newTransform() ---@type love.Transform
 
@@ -84,6 +88,7 @@ function sprite:update(dt)
 	end
 end
 
+local empty_point = {}
 function sprite:render()
 	local graphics = love.graphics ---@type love.graphics
 
@@ -93,24 +98,29 @@ function sprite:render()
 
 	transform:translate(self.x, self.y)
 
+	local off_x, off_y = -self.offset[1], -self.offset[2]
 	local anim = self.animation.currentAnimation
-	if anim.offset then
-		transform:translate(-anim.offset[1], -anim.offset[2])
+	if self.animation then
+		if anim.offset then
+			off_x = off_x - anim.offset[1]
+			off_y = off_y - anim.offset[2]
+		end
 	end
+	transform:translate(off_x, off_y)
 
 	local centerx,centery = 0, 0
-	transform:translate(self.origin[1] + anim.offset[1], self.origin[2] + anim.offset[2])
+	transform:translate(self.origin[1] - off_x, self.origin[2] - off_y)
 		transform:rotate(self.angle)
 		transform:scale(self.scale[1], self.scale[2])
 		transform:shear(self.shear[1], self.shear[2])
 		centerx,centery = transform:transformPoint(0, 0)
-	transform:translate(-self.origin[1] - anim.offset[1], -self.origin[2] - anim.offset[2])
+	transform:translate(-self.origin[1] + off_x, -self.origin[2] + off_y)
 
 	graphics.push()
 		graphics.applyTransform(transform)
 		graphics.rectangle("line", 0, 0, self.width, self.height)
 	graphics.pop()
-	
+
 	local frame
 	if self.animation then
 		frame = self.currentFrame
@@ -120,13 +130,13 @@ function sprite:render()
 		if frame.angle then
 			transform:rotate(frame.angle)
 		end
-	end
 
-	if self.animation then
 		graphics.draw(self.graphic, frame.quad, transform)
 	else
 		graphics.draw(self.graphic, transform)
 	end
+
+	love.graphics.print(off_x .. "||" .. anim.offset[1])
 
 	love.graphics.points(centerx,centery)
 end
