@@ -49,7 +49,8 @@ Hai! Hello! This project oringated because I really liked deltarune and wanted t
 
 ### Animation System 
 > very rudimentary and basic, being based off of flixel's fuck ass system  
-> here's some sample code so you can get a grip on how this works
+> here's some sample code so you can get a grip on how this works  
+> it also works with rotation now!  
 > ```lua
 >test = sprite:new(0, 0, love.graphics.newImage("BOYFRIEND.png")) ---@type sprite
 >test:loadFrames("BOYFRIEND.lua")
@@ -61,4 +62,4 @@ Hai! Hello! This project oringated because I really liked deltarune and wanted t
 >
 >test.animation:play("idle")
 >```
-> <img src="https://github.com/user-attachments/assets/2c66bcda-aa99-433e-98a4-ec8f1f06c489" width="380">
+> <img src="https://github.com/user-attachments/assets/21247d90-1d5a-45d9-8f9b-2296d4cc20d3" width="380">
