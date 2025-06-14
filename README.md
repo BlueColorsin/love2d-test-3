@@ -10,10 +10,16 @@ also uses love12 so get that btw (I swear to god can this release ANY FASTER)
 This project is the combination of work from 3 different love2d attempts
 ## RPG TEST 001
 The first love2D test was this self insert rpg attempt called externally as Colo(u)r Brawl, I was making it with a friend but we got too out of scope and it never really went anywhere, I also didn't really know how to use love2D, or let alone understand most of the systems that are required to use love2D at the time, and my only saving grace was like 7 different liberaries that did most of the work for me. The main take away is that this was my intro into love2D, and my start as a failed game dev.  
+<img src="https://github.com/user-attachments/assets/ad3bd460-8074-4bb9-ad9d-88bdab3e6a37" width="380">
 ## LOVE2D-ENGINE
 An attempt at a full love2d engine, based off of some of the code from RPG TEST 001, never really went anywhere for the same reason.  
+<img src="https://github.com/user-attachments/assets/cbc3f9b3-417f-4496-9c65-cfbe3ec1f0eb" width="380">
+
 ## LOVE2D-BULLSHIT
 This is the project where I finally started to understand the deeper workings of love2d, not well mind you I was making a system that involved using the stencil system masking a rectangle for animation (bro did NOT know about `love.graphics.newQuad`), but some important parts from there like the sparrow parcing was originated from that project. Also the code base for that project was REALLY STUPID, all of it was local functions, by all of it, I MEAN all of it. Objects worked by creating a new table and appending ALL of the local functions into it. It worked, maybe it was faster, but by god was it stupid and annoying to work with.  
+I wish I was joking  
+<img src="https://github.com/user-attachments/assets/01585b97-d588-4b17-aa9d-ff64ac24d132" width="380">
+
 ## THIS PROJECT (LOVE2D TEST 3)
 Hai! Hello! This project oringated because I really liked deltarune and wanted to give a full shot on at least making SOMETHING of essence, a project with a goal, which I still have not fully found yet, that's what I need to work on, maybe I'll draw up drafts of somethings I don't know. GOD IT IS REALLY HARD TO COME UP WITH IDEAS THAT ARE NOT STEALING FROM TOBY FOXES WORK FUCKKKK, like the battle system is such a good idea oh my fucking god I wanna steal it I WANT TO STEAL IT SO BAD BUT I CAN'TTT. How can I iterate on something that is so simple yet so fundimental in a creative yet interesting way. It reminds me of just shapes and beats a bit  
 
@@ -55,3 +61,4 @@ Hai! Hello! This project oringated because I really liked deltarune and wanted t
 >
 >test.animation:play("idle")
 >```
+> <img src="https://github.com/user-attachments/assets/2c66bcda-aa99-433e-98a4-ec8f1f06c489" width="380">
