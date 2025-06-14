@@ -70,16 +70,27 @@ local c_x, c_y = 0, 0
 function love.load()
 	love.filesystem.setIdentity("colorsin_testing")
 
-	converters.sparrow("BOYFRIEND.xml", "BOYFRIEND.lua")
+	converters.sparrow("end-1.xml", "end.lua")
 
 	test = sprite:new(0, 0, love.graphics.newImage("BOYFRIEND.png")) ---@type sprite
 	test:loadFrames("BOYFRIEND.lua")
+	--END
+	-- test.animation:add("idle"     , {1,  2}, 9, false)
+	-- test.animation:add("singLEFT" , {7,  8}, 9, false)
+	-- test.animation:add("singDOWN" , {5,  6}, 9, false)
+	-- test.animation:add("singUP"   , {3,  4}, 9, false)
+	-- test.animation:add("singRIGHT", {9, 10}, 9, false)
+	
+	--BF
 	test.animation:addByTag("idle"     , "BF idle dance", 24, false, {-5 ,  0})
 	test.animation:addByTag("singLEFT" , "BF NOTE LEFT" , 24, false, { 5 , -6})
 	test.animation:addByTag("singDOWN" , "BF NOTE DOWN" , 24, false, {-20, -51})
 	test.animation:addByTag("singUP"   , "BF NOTE UP"   , 24, false, {-46,  27})
 	test.animation:addByTag("singRIGHT", "BF NOTE RIGHT", 24, false, {-48, -7})
-	
+
+	local idle_frames = test.animation.animations["idle"].frames
+	test:setOrigin(idle_frames[#idle_frames])
+
 	test.animation:play("idle")
 
 	love.graphics.setNewFont(18)
@@ -95,7 +106,8 @@ function love.update(dt)
 
 	if fuckedUp then
 		elapsed = elapsed + dt
-		-- test:set("shear", math.sin(elapsed), math.sin(elapsed))
+		test:set("shear", math.sin(elapsed), math.cos(elapsed))
+		test:set("scale", math.cos(elapsed), math.sin(elapsed))
 		test.angle = test.angle + math.rad(90) * dt
 	end
 end
@@ -156,12 +168,17 @@ function love.draw()
 
 	graphics.translate(c_x, c_y)
 		graphics.scale(zoom)
+		-- graphics.rotate(-test.angle)
 	graphics.translate(-c_x, -c_y)
 
 	local _x, _y = graphics.inverseTransformPoint(love.mouse.getGlobalPosition())
+	local dx, dy = (_x - last_x), (_y - last_y)
+
 	if love.mouse.isDown(3) then
-		local dx, dy = (_x - last_x), (_y - last_y)
 		x, y = x + dx, y + dy
+	end
+	if love.mouse.isDown(1) then
+		test.x, test.y = test.x + dx, test.y + dy
 	end
 	last_x, last_y = _x, _y
 

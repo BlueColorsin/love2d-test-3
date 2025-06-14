@@ -38,10 +38,23 @@ function sprite:setFrame(index)
 
 	self.width = frame.dimensions[1]
 	self.height = frame.dimensions[2]
-	self.origin = {self.width/2, self.height/2}
 
 	self.currentFrame = frame
-	self.frameIndex = frame
+	self.frameIndex = index
+end
+
+--sets the 
+function sprite:setOrigin(...)
+	local values = {...}
+	local args = #values
+
+	-- fucked up and evil polymorphism
+	if args == 1 and type(values[1]) == "number" then
+		local dimensions = self.frames[values[1]].dimensions
+		self:set("origin", dimensions[1]/2, dimensions[2]/2)
+	elseif args == 2 then
+		self:set("origin", values[1], values[2])
+	end
 end
 
 function sprite:loadFrames(path)
@@ -76,12 +89,28 @@ function sprite:render()
 
 	local transform = self.transform:reset()
 
-	transform:translate(self.origin[1], self.origin[2])
+	graphics.setPointSize(8);
+
+	transform:translate(self.x, self.y)
+
+	local anim = self.animation.currentAnimation
+	if anim.offset then
+		transform:translate(-anim.offset[1], -anim.offset[2])
+	end
+
+	local centerx,centery = 0, 0
+	transform:translate(self.origin[1] + anim.offset[1], self.origin[2] + anim.offset[2])
 		transform:rotate(self.angle)
 		transform:scale(self.scale[1], self.scale[2])
 		transform:shear(self.shear[1], self.shear[2])
-	transform:translate(-self.origin[1], -self.origin[2])
+		centerx,centery = transform:transformPoint(0, 0)
+	transform:translate(-self.origin[1] - anim.offset[1], -self.origin[2] - anim.offset[2])
 
+	graphics.push()
+		graphics.applyTransform(transform)
+		graphics.rectangle("line", 0, 0, self.width, self.height)
+	graphics.pop()
+	
 	local frame
 	if self.animation then
 		frame = self.currentFrame
@@ -91,21 +120,15 @@ function sprite:render()
 		if frame.angle then
 			transform:rotate(frame.angle)
 		end
-
-		local anim = self.animation.currentAnimation
-		if anim.offset then
-			-- the offset is BROKEN at angles for some unFORSAKEN reason
-			transform:translate(-anim.offset[1], -anim.offset[2])
-		end
 	end
-
-	transform:translate(self.x, self.y)
 
 	if self.animation then
 		graphics.draw(self.graphic, frame.quad, transform)
 	else
 		graphics.draw(self.graphic, transform)
 	end
+
+	love.graphics.points(centerx,centery)
 end
 
 function sprite:release()
