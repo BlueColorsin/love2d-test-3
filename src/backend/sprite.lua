@@ -9,6 +9,12 @@ function sprite:_new(x, y, graphic)
 	self.x = x or 0
 	self.y = y or 0
 
+	self.color = {1, 1, 1}
+	self.alpha = 1
+
+	self.visible = true
+	self.active = true
+
 	self.width = self.graphic:getWidth()
 	self.height = self.graphic:getHeight()
 
@@ -20,7 +26,7 @@ function sprite:_new(x, y, graphic)
 	self.scale = {1, 1}
 	self.shear = {0, 0}
 
-	self.scrollFactor = {0.5, 0.5}
+	self.scrollFactor = {1, 1}
 
 	self.transform = love.math.newTransform() ---@type love.Transform
 
@@ -31,24 +37,11 @@ function sprite:_new(x, y, graphic)
 	self.frames = nil
 	self.currentFrame = nil
 	self.frameIndex = nil
+
+	self.play_anim = nil
 end
 
-function sprite:setFrame(index)
-	if self.frames[index] == nil or self.frameIndex == index then
-		return
-	end
-
-	local frame = self.frames[index]
-
-	self.width = frame.dimensions[1]
-	self.height = frame.dimensions[2]
-
-	self.currentFrame = frame
-	self.frameIndex = index
-end
-
---sets the 
-function sprite:setOrigin(...)
+function sprite:set_origin(...)
 	local values = {...}
 	local args = #values
 
@@ -58,38 +51,22 @@ function sprite:setOrigin(...)
 		self:set("origin", dimensions[1]/2, dimensions[2]/2)
 	elseif args == 2 then
 		self:set("origin", values[1], values[2])
+	elseif args == 0 then
+		self:set("origin", self.height/2, self.width/2)
 	end
-end
-
-function sprite:loadFrames(path)
-	local chunk, err = love.filesystem.load(path)
-	if err then
-		error("ERROR LOADING ATLAS! <"..path:upper().."> "..err)
-	end
-
-	local success, frames = pcall(chunk, self.graphic)
-	if not success then
-		error("ERROR LOADING ATLAS: <"..path:upper().."> "..ret)
-	end
-
-	if #frames == 0 then
-		error("ERROR LOADING ATLAS: <"..path:upper().."> | YOUR ATLAS NEEDS FRAMES DUMBASS!")
-	end
-
-	self.frames = frames
-	self.animation = animation:new(self)
-
-	self:setFrame(1)
 end
 
 function sprite:update(dt)
+	if not self.active then return end
+
 	if self.animation then
 		self.animation:update(dt)
 	end
 end
 
-local empty_point = {}
 function sprite:render()
+	if not self.visible or self.alpha == 0 then return end
+
 	local graphics = love.graphics ---@type love.graphics
 
 	local transform = self.transform:reset()
@@ -106,13 +83,12 @@ function sprite:render()
 	transform:translate(-self.origin[1], -self.origin[2])
 
 	local off_x, off_y = -self.offset[1], -self.offset[2]
-	local anim = self.animation.currentAnimation
-	if self.animation then
-		if anim.offset then
-			off_x = off_x - anim.offset[1]
-			off_y = off_y - anim.offset[2]
-		end
+
+	local anim = self.animation and self.animation.current_anim
+	if anim and anim.offset then
+		off_x, off_y = off_x - anim.offset[1], off_y - anim.offset[2]
 	end
+
 	transform:translate(off_x, off_y)
 
 	if self.debug_draw then
@@ -122,9 +98,12 @@ function sprite:render()
 		graphics.pop()
 	end
 
-	local frame
-	if self.animation then
-		frame = self.currentFrame
+	local r,g,b,a = graphics.getColor()
+	graphics.setColor(r,g,b,a)
+	graphics.setColor(self.color[1], self.color[2], self.color[3], self.alpha)
+
+	local frame = self.currentFrame
+	if frame then
 		--relies that the spritesheet has the right angled offset
 		transform:translate(frame.offset[1], frame.offset[2])
 
@@ -136,6 +115,8 @@ function sprite:render()
 	else
 		graphics.draw(self.graphic, transform)
 	end
+
+	graphics.setColor(r,g,b,a)
 end
 
 function sprite:release()
@@ -143,15 +124,60 @@ function sprite:release()
 	self.transform:release()
 	self.graphic:release()
 
-	for key, value in pairs(self.frames) do
+	for key, value in ipairs(self.frames) do
 		value.quad:release()
 	end
 
-	for key, value in pairs(self) do
-		rawset(self, key, nil)
+	self.active = false
+	self.visible = false
+
+	---@diagnostic disable-next-line: missing-fields
+	self = {}
+end
+
+function sprite:setup_animation()
+	self.frames = self.frames or {}
+
+	self.currentFrame = self.frames[1]
+	self.frameIndex = 1
+
+	self.animation = animation:new(self)
+
+	self.play_anim = self.animation.play
+end
+
+function sprite:set_frame(index)
+	if self.frames[index] == nil or self.frameIndex == index then
+		return
 	end
 
-	self = nil
+	local frame = self.frames[index]
+
+	self.width = frame.dimensions[1]
+	self.height = frame.dimensions[2]
+
+	self.currentFrame = frame
+	self.frameIndex = index
+end
+
+function sprite:load_frames(path)
+	local chunk, err = love.filesystem.load(path)
+	if err then
+		error("ERROR LOADING ATLAS! <"..path:upper().."> "..err)
+	end
+
+	local success, frames = pcall(chunk, self.graphic)
+	if not success then
+		error("ERROR LOADING ATLAS: <"..path:upper().."> "..ret)
+	end
+
+	if #frames == 0 then
+		error("ERROR LOADING ATLAS: <"..path:upper().."> | YOUR ATLAS NEEDS FRAMES DUMBASS!")
+	end
+
+	self.frames = frames
+	self:setup_animation()
+	self:set_frame(1)
 end
 
 return sprite

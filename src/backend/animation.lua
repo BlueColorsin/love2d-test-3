@@ -15,23 +15,23 @@ function animation:_new(parent)
 	self.parent = parent
 	self.frames = parent.frames
 
-	self.currentAnimation = nil
-	self.animationName = ""
+	self.current_anim = nil
+	self.anim_name = ""
 
-	self.animTimer = 0
+	self.timer = 0
 	self.playing = false
 	self.finished = false
 
-	self.onFinish = nil
-	self.onFrameChange = nil
+	self._finish = nil
+	self._frame_change = nil
 
-	-- just stop the controller and manually change the offset 
+	-- used internally
 	self._index = 1
 
 	self.animations = {}
 end
 
-function animation:addByTag(name, tag, fps, loop, offset, flipX, flipY)
+function animation:add_by_tag(name, tag, fps, loop, offset, flipX, flipY)
 	local frames = self.frames.tags[tag]
 
 	assert(frames, "ADDBYTAG ERROR <"..name..">: NO FUCKING TAG CALLED ("..tag.."), GET TAG PLEASE!")
@@ -39,7 +39,7 @@ function animation:addByTag(name, tag, fps, loop, offset, flipX, flipY)
 	self:add(name, frames, fps, loop, offset, flipX, flipY)
 end
 
-function animation:addByIndices(name, tag, indices, fps, loop, offset, flipX, flipY)
+function animation:add_by_indices(name, tag, indices, fps, loop, offset, flipX, flipY)
 	local _frames = self.frames.tags[tag]
 
 	assert(_frames, "ADDBYINDICES ERROR <"..name..">: NO FUCKING TAG CALLED ("..tag.."), GET TAG PLEASE!")
@@ -71,18 +71,17 @@ end
 
 local function set_index(self, index)
 	self._index = index
-	self.parent:setFrame(self.currentAnimation.frames[index])
+	self.parent:set_frame(self.current_anim.frames[index])
 end
 
 function animation:update(dt)
-	if self.playing then
-		self.animTimer = self.animTimer + dt
-	end
+	if not self.playing then return end
+	self.timer = self.timer + dt
 
-	local anim = self.currentAnimation
+	local anim = self.current_anim
 
-	if self.animTimer >= (1 / anim.fps) then
-		self.animTimer = 0
+	if self.timer >= (1 / anim.fps) then
+		self.timer = 0
 
 		if not (self._index + 1 > #anim.frames) then
 			-- little trick I learned from the troll-engine repo
@@ -98,12 +97,15 @@ function animation:update(dt)
 	end
 end
 
-function animation:play(tag, forced, startFrame)
+
+function animation.play(_parent, tag, forced, startFrame)
+	local self = _parent:is(animation) and _parent or _parent.animation
+
 	if self.playing and not forced then return end
 	if not self.animations[tag] then return end
 
-	self.currentAnimation = self.animations[tag]
-	self.animationName = tag
+	self.current_anim = self.animations[tag]
+	self.anim_name = tag
 	set_index(self, startFrame or 1)
 
 	self.playing = true
@@ -111,8 +113,12 @@ function animation:play(tag, forced, startFrame)
 end
 
 function animation:release()
-	for key, value in pairs(self) do
-		rawset(self, key, nil)
+	self.playing = false
+
+	for key,value in pairs(self) do
+		if type(self[key]) == "function" then
+			self[key] = void
+		end
 	end
 
 	self = nil

@@ -1,6 +1,17 @@
 # LOVE2D TEST 3
 Hello I am john 2d using love to make things  
 
+Okay so something I wanna do mmm
+1. Asset Paths
+2. Cameras
+3. Maybe Format Everything Too Snake Case
+4. Audio Thingy
+5. More Converters
+6. State/Hot Reloading
+7. Meta.lua Files so the language server stops having a fucking stroke
+8. Cool Crash Handler
+9. More Stuff For the Todo List
+
 > WARNING: this is a for fun project and honestly can seize in development at any moment lmao  
 this project is designed for *MY* convenience   aka does alot of random bullshit that does not make anysense  
 because I am a lazy fuck that does not wanna make shit work conventionally or reasonably  

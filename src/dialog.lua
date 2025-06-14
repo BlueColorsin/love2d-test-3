@@ -42,7 +42,7 @@ local function drawText(data)
 	love.graphics.printf(data.text, data.x, data.y)
 end
 
-function dialog:draw()
+function dialog:render()
 end
 
 function dialog:progress()

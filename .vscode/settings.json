@@ -11,6 +11,7 @@
 		"lowercase-global",
 		"undefined-global",
 		"undefined-field",
-		"redundant-parameter"
+		"redundant-parameter",
+		"inject-field"
 	]
 }

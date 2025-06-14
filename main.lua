@@ -32,6 +32,7 @@ _G.converters = {
 	sparrow = require("coverters.sparrow")
 }
 
+_G.void = function()end
 --edited version of https://stackoverflow.com/a/65632110/21846847
 function serialize_list(list)
 	local str = ''
@@ -59,7 +60,8 @@ function serialize_list(list)
 	return str
 end
 
-local test
+local bf ---@type sprite
+local dad ---@type sprite
 
 local x = 0
 local y = 0
@@ -70,45 +72,56 @@ local c_x, c_y = 0, 0
 function love.load()
 	love.filesystem.setIdentity("colorsin_testing")
 
-	converters.sparrow("end-1.xml", "end.lua")
+	converters.sparrow("DADDY_DEAREST.xml", "DADDY_DEAREST.lua")
 
-	test = sprite:new(0, 0, love.graphics.newImage("BOYFRIEND.png")) ---@type sprite
-	test:loadFrames("BOYFRIEND.lua")
-	--END
-	-- test.animation:add("idle"     , {1,  2}, 9, false)
-	-- test.animation:add("singLEFT" , {7,  8}, 9, false)
-	-- test.animation:add("singDOWN" , {5,  6}, 9, false)
-	-- test.animation:add("singUP"   , {3,  4}, 9, false)
-	-- test.animation:add("singRIGHT", {9, 10}, 9, false)
-	
-	--BF
-	test.animation:addByTag("idle"     , "BF idle dance", 24, false, {-5 ,  0})
-	test.animation:addByTag("singLEFT" , "BF NOTE LEFT" , 24, false, { 5 , -6})
-	test.animation:addByTag("singDOWN" , "BF NOTE DOWN" , 24, false, {-20, -51})
-	test.animation:addByTag("singUP"   , "BF NOTE UP"   , 24, false, {-46,  27})
-	test.animation:addByTag("singRIGHT", "BF NOTE RIGHT", 24, false, {-48, -7})
+	bf = sprite:new(0, 0, love.graphics.newImage("BOYFRIEND.png"))
+	bf:load_frames("BOYFRIEND.lua")
+	bf.animation:add_by_tag("idle"     , "BF idle dance", 24, false, {-5 ,  0})
+	bf.animation:add_by_tag("singLEFT" , "BF NOTE LEFT" , 24, false, { 5 , -6})
+	bf.animation:add_by_tag("singDOWN" , "BF NOTE DOWN" , 24, false, {-20, -51})
+	bf.animation:add_by_tag("singUP"   , "BF NOTE UP"   , 24, false, {-46,  27})
+	bf.animation:add_by_tag("singRIGHT", "BF NOTE RIGHT", 24, false, {-48, -7})
 
-	local idle_frames = test.animation.animations["idle"].frames
-	test:setOrigin(idle_frames[#idle_frames])
+	local idle_frames = bf.animation.animations["idle"].frames
+	bf:set_origin(idle_frames[#idle_frames])
 
-	test.animation:play("idle")
+	bf:play_anim("idle")
+
+	dad = sprite:new(0, 0, love.graphics.newImage("DADDY_DEAREST.png"))
+	dad:load_frames("DADDY_DEAREST.lua")
+	dad.animation:add_by_tag("idle"     , "Dad idle dance"     , 24, false, { 0 ,  0})
+	dad.animation:add_by_tag("singLEFT" , "Dad Sing Note LEFT" , 24, false, {-9 , -10})
+	dad.animation:add_by_tag("singDOWN" , "Dad Sing Note DOWN" , 24, false, { 0 , -30})
+	dad.animation:add_by_tag("singUP"   , "Dad Sing Note UP"   , 24, false, {-6 ,  50})
+	dad.animation:add_by_tag("singRIGHT", "Dad Sing Note RIGHT", 24, false, { 0 ,  27})
+
+	idle_frames = dad.animation.animations["idle"].frames
+	for i,v in pairs(idle_frames) do
+		print(i,v)	
+	end
+	dad:set_origin(idle_frames[#idle_frames])
+
+	dad:play_anim("idle")
 
 	love.graphics.setNewFont(18)
-
-	print()
 end
 
 local fuckedUp = false
 
 local elapsed = 0
 function love.update(dt)
-	test:update(dt)
+	bf:update(dt)
+	dad:update(dt)
 
 	if fuckedUp then
 		elapsed = elapsed + dt
-		test:set("shear", math.sin(elapsed), math.cos(elapsed))
-		test:set("scale", math.cos(elapsed), math.sin(elapsed))
-		test.angle = test.angle + math.rad(90) * dt
+		bf:set("shear", math.sin(elapsed), math.cos(elapsed))
+		bf:set("scale", math.cos(elapsed), math.sin(elapsed))
+		bf.angle = bf.angle + math.rad(90) * dt
+
+		dad:set("shear", math.sin(elapsed), math.cos(elapsed))
+		dad:set("scale", math.cos(elapsed), math.sin(elapsed))
+		dad.angle = dad.angle + math.rad(90) * dt
 	end
 end
 
@@ -120,15 +133,20 @@ function love.keypressed(key, scancode, isrepeat)
 	end
 
 	if key == "left" then
-		test.animation:play("singLEFT", true)
+		bf:play_anim("singLEFT", true)
+		dad:play_anim("singLEFT", true)
 	elseif key == "right" then
-		test.animation:play("singRIGHT", true)
+		bf:play_anim("singRIGHT", true)
+		dad:play_anim("singRIGHT", true)
 	elseif key == "down" then
-		test.animation:play("singDOWN", true)
+		bf:play_anim("singDOWN", true)
+		dad:play_anim("singDOWN", true)
 	elseif key == "up" then
-		test.animation:play("singUP", true)
+		bf:play_anim("singUP", true)
+		dad:play_anim("singUP", true)
 	elseif key == "space" then
-		test.animation:play("idle", true)
+		bf:play_anim("idle", true)
+		dad:play_anim("idle", true)
 	end
 end
 
@@ -136,30 +154,13 @@ function love.wheelmoved(x, y)
 	zoom = zoom + y * 0.1
 end
 
-function love.mousemoved(_x, _y, dx, dy, istouch)
-	if love.mouse.isDown(3) then
-		-- x, y = x + dx, y + dy
-	end
-end
-
-local curIdx = 1
-function updateIndex(val, length)
-	curIdx = curIdx + val
-
-	if (curIdx < 1) then
-		curIdx = curIdx + (length - 1)
-	elseif (curIdx >= length) then
-		curIdx = curIdx % (length - 1)
-	end
-
-	test:setFrame(curIdx)
-end
+function love.mousemoved(_x, _y, dx, dy, istouch) end
 
 local last_x, last_y = 0, 0
 
 function love.draw()
 	local graphics = love.graphics ---@type love.graphics
-	
+
 	-- use this as the basis for the camera renderer later 
 	graphics.push()
 	graphics.clear(0.5, 0.5, 0.5, 1)
@@ -168,7 +169,6 @@ function love.draw()
 
 	graphics.translate(c_x, c_y)
 		graphics.scale(zoom)
-		-- graphics.rotate(-test.angle)
 	graphics.translate(-c_x, -c_y)
 
 	local _x, _y = graphics.inverseTransformPoint(love.mouse.getGlobalPosition())
@@ -178,16 +178,18 @@ function love.draw()
 		x, y = x + dx, y + dy
 	end
 	if love.mouse.isDown(1) then
-		test.x, test.y = test.x + dx, test.y + dy
+		bf.x, bf.y = bf.x + dx, bf.y + dy
 	end
 	last_x, last_y = _x, _y
 
 	graphics.translate(x, y)
 
-	test:render()
+	bf:render()
+	dad:render()
 
 	graphics.pop()
 
 	graphics.print(x.."|"..y, 0, 100)
+	graphics.print(dad.animation._index, 0, 150)
 	graphics.print("zoom :" .. math.floor((zoom * 100)) * 0.01)
 end
