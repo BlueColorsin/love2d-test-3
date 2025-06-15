@@ -1,13 +1,19 @@
-local sprite = object:extend() ---@class sprite:object
+local sprite = object:extend() ---@class sprite:object,animation
 sprite:implement(util.point)
 
 -- I LOVE TURNINATIRES!
 
 function sprite:_new(x, y, graphic)
 	self.graphic = graphic or nil ---@type love.Image
+	-- just done to make the draw logic simanimser, could actually be used if not animated
+	self.quad = nil
 
 	self.x = x or 0
 	self.y = y or 0
+
+	self.transform = love.math.newTransform() ---@type love.Transform
+
+	self.scrollFactor = {0.5, 0.5}
 
 	self.color = {1, 1, 1}
 	self.alpha = 1
@@ -26,22 +32,12 @@ function sprite:_new(x, y, graphic)
 	self.scale = {1, 1}
 	self.shear = {0, 0}
 
-	self.scrollFactor = {1, 1}
+	-- I lowk gotta shake that belly!
 
-	self.transform = love.math.newTransform() ---@type love.Transform
-
-	--animation bullshit that is nil by default because not everything is animated
-	 -- I lowk gotta shake that belly!
-	self.animation = nil ---@type animation
-
-	self.frames = nil
-	self.currentFrame = nil
-	self.frameIndex = nil
-
-	self.play_anim = nil
+	self.animation = false
 end
 
-function sprite:set_origin(...)
+function sprite:setOrigin(...)
 	local values = {...}
 	local args = #values
 
@@ -60,7 +56,7 @@ function sprite:update(dt)
 	if not self.active then return end
 
 	if self.animation then
-		self.animation:update(dt)
+		self:handle_animation(dt)
 	end
 end
 
@@ -84,25 +80,16 @@ function sprite:render()
 
 	local off_x, off_y = -self.offset[1], -self.offset[2]
 
-	local anim = self.animation and self.animation.current_anim
+	local anim = self.animation and self.current_anim
 	if anim and anim.offset then
 		off_x, off_y = off_x - anim.offset[1], off_y - anim.offset[2]
 	end
 
 	transform:translate(off_x, off_y)
 
-	if self.debug_draw then
-		graphics.push()
-		graphics.applyTransform(transform)
-		graphics.rectangle("line", 0, 0, self.width, self.height)
-		graphics.pop()
-	end
+	local quad = self.quad
 
-	local r,g,b,a = graphics.getColor()
-	graphics.setColor(r,g,b,a)
-	graphics.setColor(self.color[1], self.color[2], self.color[3], self.alpha)
-
-	local frame = self.currentFrame
+	local frame = self.current_frame
 	if frame then
 		--relies that the spritesheet has the right angled offset
 		transform:translate(frame.offset[1], frame.offset[2])
@@ -111,7 +98,14 @@ function sprite:render()
 			transform:rotate(frame.angle)
 		end
 
-		graphics.draw(self.graphic, frame.quad, transform)
+		quad = frame.quad or quad
+	end
+
+	local r,g,b,a = graphics.getColor()
+	graphics.setColor(self.color[1], self.color[2], self.color[3], self.alpha)
+
+	if quad then
+		graphics.draw(self.graphic, quad, transform)
 	else
 		graphics.draw(self.graphic, transform)
 	end
@@ -120,7 +114,10 @@ function sprite:render()
 end
 
 function sprite:release()
-	self.animation:release()
+	if self.animation then
+		self.playing = false
+	end
+
 	self.transform:release()
 	self.graphic:release()
 
@@ -135,31 +132,8 @@ function sprite:release()
 	self = {}
 end
 
-function sprite:setup_animation()
-	self.frames = self.frames or {}
-
-	self.currentFrame = self.frames[1]
-	self.frameIndex = 1
-
-	self.animation = animation:new(self)
-
-	self.play_anim = self.animation.play
-end
-
-function sprite:set_frame(index)
-	if self.frames[index] == nil or self.frameIndex == index then
-		return
-	end
-
-	local frame = self.frames[index]
-
-	self.width = frame.dimensions[1]
-	self.height = frame.dimensions[2]
-
-	self.currentFrame = frame
-	self.frameIndex = index
-end
-
+-- as it turns out animation as a whole is easy enough to litterally just implement
+-- so that's what I did 
 function sprite:load_frames(path)
 	local chunk, err = love.filesystem.load(path)
 	if err then
@@ -176,8 +150,8 @@ function sprite:load_frames(path)
 	end
 
 	self.frames = frames
-	self:setup_animation()
-	self:set_frame(1)
+	self:implement(animation)
+	self:setFrame(1)
 end
 
 return sprite

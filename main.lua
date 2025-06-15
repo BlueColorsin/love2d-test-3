@@ -72,36 +72,36 @@ local c_x, c_y = 0, 0
 function love.load()
 	love.filesystem.setIdentity("colorsin_testing")
 
-	converters.sparrow("DADDY_DEAREST.xml", "DADDY_DEAREST.lua")
+	-- converters.sparrow("DADDY_DEAREST.xml", "DADDY_DEAREST.lua")
 
 	bf = sprite:new(0, 0, love.graphics.newImage("BOYFRIEND.png"))
 	bf:load_frames("BOYFRIEND.lua")
-	bf.animation:add_by_tag("idle"     , "BF idle dance", 24, false, {-5 ,  0})
-	bf.animation:add_by_tag("singLEFT" , "BF NOTE LEFT" , 24, false, { 5 , -6})
-	bf.animation:add_by_tag("singDOWN" , "BF NOTE DOWN" , 24, false, {-20, -51})
-	bf.animation:add_by_tag("singUP"   , "BF NOTE UP"   , 24, false, {-46,  27})
-	bf.animation:add_by_tag("singRIGHT", "BF NOTE RIGHT", 24, false, {-48, -7})
+	bf:add_anim("idle"     , "BF idle dance", 24, false, {-5 ,  0})
+	bf:add_anim("singLEFT" , "BF NOTE LEFT" , 24, false, { 5 , -6})
+	bf:add_anim("singDOWN" , "BF NOTE DOWN" , 24, false, {-20, -51})
+	bf:add_anim("singUP"   , "BF NOTE UP"   , 24, false, {-46,  27})
+	bf:add_anim("singRIGHT", "BF NOTE RIGHT", 24, false, {-48, -7})
 
-	local idle_frames = bf.animation.animations["idle"].frames
-	bf:set_origin(idle_frames[#idle_frames])
+	local idle_frames = bf.anims["idle"].frames
+	bf:setOrigin(idle_frames[#idle_frames])
 
 	bf:play_anim("idle")
 
-	dad = sprite:new(0, 0, love.graphics.newImage("DADDY_DEAREST.png"))
-	dad:load_frames("DADDY_DEAREST.lua")
-	dad.animation:add_by_tag("idle"     , "Dad idle dance"     , 24, false, { 0 ,  0})
-	dad.animation:add_by_tag("singLEFT" , "Dad Sing Note LEFT" , 24, false, {-9 , -10})
-	dad.animation:add_by_tag("singDOWN" , "Dad Sing Note DOWN" , 24, false, { 0 , -30})
-	dad.animation:add_by_tag("singUP"   , "Dad Sing Note UP"   , 24, false, {-6 ,  50})
-	dad.animation:add_by_tag("singRIGHT", "Dad Sing Note RIGHT", 24, false, { 0 ,  27})
+	---@type sprite
+	-- dad = sprite:new(0, 0, love.graphics.newImage("DADDY_DEAREST.png"))
+	-- dad:load_frames("DADDY_DEAREST.lua")
+	-- dad:add_anim("idle"     , "Dad idle dance"     , 24, false, { 0 ,  0})
+	-- dad:add_anim("singLEFT" , "Dad Sing Note LEFT" , 24, false, {-9 ,  10})
+	-- dad:add_anim("singDOWN" , "Dad Sing Note DOWN" , 24, false, { 0 , -30})
+	-- dad:add_anim("singUP"   , "Dad Sing Note UP"   , 24, false, {-6 ,  50})
+	-- dad:add_anim("singRIGHT", "Dad Sing Note RIGHT", 24, false, { 0 ,  27})
 
-	idle_frames = dad.animation.animations["idle"].frames
-	for i,v in pairs(idle_frames) do
-		print(i,v)	
-	end
-	dad:set_origin(idle_frames[#idle_frames])
+	-- dad:play_anim()
 
-	dad:play_anim("idle")
+	-- idle_frames = dad.anims["idle"].frames
+	-- dad:setOrigin(idle_frames[#idle_frames])
+
+	-- dad:play_anim("idle")
 
 	love.graphics.setNewFont(18)
 end
@@ -111,7 +111,7 @@ local fuckedUp = false
 local elapsed = 0
 function love.update(dt)
 	bf:update(dt)
-	dad:update(dt)
+	-- dad:update(dt)
 
 	if fuckedUp then
 		elapsed = elapsed + dt
@@ -119,9 +119,9 @@ function love.update(dt)
 		bf:set("scale", math.cos(elapsed), math.sin(elapsed))
 		bf.angle = bf.angle + math.rad(90) * dt
 
-		dad:set("shear", math.sin(elapsed), math.cos(elapsed))
-		dad:set("scale", math.cos(elapsed), math.sin(elapsed))
-		dad.angle = dad.angle + math.rad(90) * dt
+		-- dad:set("shear", math.sin(elapsed), math.cos(elapsed))
+		-- dad:set("scale", math.cos(elapsed), math.sin(elapsed))
+		-- dad.angle = dad.angle + math.rad(90) * dt
 	end
 end
 
@@ -134,19 +134,19 @@ function love.keypressed(key, scancode, isrepeat)
 
 	if key == "left" then
 		bf:play_anim("singLEFT", true)
-		dad:play_anim("singLEFT", true)
+		-- dad:play_anim("singLEFT", true)
 	elseif key == "right" then
 		bf:play_anim("singRIGHT", true)
-		dad:play_anim("singRIGHT", true)
+		-- dad:play_anim("singRIGHT", true)
 	elseif key == "down" then
 		bf:play_anim("singDOWN", true)
-		dad:play_anim("singDOWN", true)
+		-- dad:play_anim("singDOWN", true)
 	elseif key == "up" then
 		bf:play_anim("singUP", true)
-		dad:play_anim("singUP", true)
+		-- dad:play_anim("singUP", true)
 	elseif key == "space" then
 		bf:play_anim("idle", true)
-		dad:play_anim("idle", true)
+		-- dad:play_anim("idle", true)
 	end
 end
 
@@ -185,11 +185,9 @@ function love.draw()
 	graphics.translate(x, y)
 
 	bf:render()
-	dad:render()
+	-- dad:render()
 
 	graphics.pop()
 
-	graphics.print(x.."|"..y, 0, 100)
-	graphics.print(dad.animation._index, 0, 150)
 	graphics.print("zoom :" .. math.floor((zoom * 100)) * 0.01)
 end

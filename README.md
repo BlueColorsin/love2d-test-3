@@ -64,13 +64,13 @@ Hai! Hello! This project oringated because I really liked deltarune and wanted t
 > it also works with rotation now!  
 > ```lua
 >test = sprite:new(0, 0, love.graphics.newImage("BOYFRIEND.png")) ---@type sprite
->test:loadFrames("BOYFRIEND.lua")
->test.animation:addByTag("idle"     , "BF idle dance", 24, false, {-5 ,  0})
->test.animation:addByTag("singLEFT" , "BF NOTE LEFT" , 24, false, { 5 , -6})
->test.animation:addByTag("singDOWN" , "BF NOTE DOWN" , 24, false, {-20, -51})
->test.animation:addByTag("singUP"   , "BF NOTE UP"   , 24, false, {-46,  27})
->test.animation:addByTag("singRIGHT", "BF NOTE RIGHT", 24, false, {-48, -7})
+>test:load_frames("BOYFRIEND.lua")
+>test.add_anim("idle"     , "BF idle dance", 24, false, {-5 ,  0})
+>test.add_anim("singLEFT" , "BF NOTE LEFT" , 24, false, { 5 , -6})
+>test.add_anim("singDOWN" , "BF NOTE DOWN" , 24, false, {-20, -51})
+>test.add_anim("singUP"   , "BF NOTE UP"   , 24, false, {-46,  27})
+>test.add_anim("singRIGHT", "BF NOTE RIGHT", 24, false, {-48, -7})
 >
->test.animation:play("idle")
+>test.play_anim("idle")
 >```
 > <img src="https://github.com/user-attachments/assets/21247d90-1d5a-45d9-8f9b-2296d4cc20d3" width="380">
