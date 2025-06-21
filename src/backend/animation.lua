@@ -1,6 +1,6 @@
 local animation = {} ---@class animation
 
---function used by the implement function to 
+--function used by the implement function to well add animation to an object
 function animation:append()
 	self.animation = true
 
@@ -32,7 +32,7 @@ function animation:handle_animation(dt)
 	if not self.playing or not anim then return end
 	self.anim_timer = self.anim_timer + dt
 
-	if self.anim_timer >= (1 / anim.fps) then
+	if self.anim_timer >= anim.duration then
 		self.anim_timer = 0
 
 		if not (self.anim_index + self.anim_step > #anim.frames) then
@@ -80,10 +80,14 @@ function animation:add_anim(name, dynamic, fps, loop, offset, priority)
 	}
 end
 
+function animation:define_tag(name, data, ...)
+
+end
+
 ---
 ---@param name string | table
----@param priority number | boolean
----@param start_frame integer
+---@param priority ?number | boolean
+---@param start_frame ?integer
 function animation:play_anim(name, priority, start_frame)
 	priority = (priority == true and 256 or priority)
 
@@ -115,6 +119,9 @@ function animation:setFrame(index)
 
 	self.current_frame = frame
 	self.frame_index = index
+end
+
+function animation:getTag(name)
 end
 
 return animation

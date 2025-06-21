@@ -27,7 +27,6 @@ end
 
 function object:implement(...)
 	for _, cls in pairs({...}) do
-
 		for k, v in pairs(cls) do
 			if self[k] == nil and type(v) == "function" and k ~= "append" then
 				self[k] = v

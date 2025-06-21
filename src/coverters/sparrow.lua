@@ -35,8 +35,9 @@ return function(path, save_to)
 	local first_instance = {}
 
 	for index, value in ipairs(data.children[1].children) do --data.children[1].children
+		local frame
+
 		value = value.attrs
-		local frame = {}
 
 		local sub_num = value.name:sub(0, #value.name - 4)
 		if frames.tags[sub_num] == nil then
@@ -44,13 +45,6 @@ return function(path, save_to)
 		end
 
 		local tag = frames.tags[sub_num]
-
-		if value.flipX then
-			frame.flipX = value.flipX or false
-		end
-		if value.flipY then
-			frame.flipY = value.flipY or false
-		end
 
 		local trimmed = (value.frameX ~= nil)
 		local rotated = value.rotated or false
@@ -62,16 +56,9 @@ return function(path, save_to)
 			size = {0,0,value.width,value.height}
 		end
 
-		if not rotated or trimmed then
-			frame.dimensions = raw("{"..size[3]..", "..size[4].."}")
-		else
-			frame.dimensions = raw("{"..size[4]..", "..size[3].."}")
-		end
-
 		size[1], size[2] = -size[1], -size[2]
 		if rotated then
 			size[2] = size[2] + value.width
-			frame.angle = rotated and math.rad(270) or 0
 		end
 
 		local key = value.x..value.y..value.width..value.height..size[1]..size[2]..size[3]..size[4]
@@ -81,8 +68,23 @@ return function(path, save_to)
 			goto atomic_rizzler
 		end
 
+		--HONESTLY, fuck flipX and flipY
+
+		frame = {}
+
+		if not rotated or trimmed then
+			frame.dimensions = raw("{"..size[3]..", "..size[4].."}")
+		else
+			frame.dimensions = raw("{"..size[4]..", "..size[3].."}")
+		end
+
 		frame.offset = raw("{"..size[1]..", "..size[2].."}")
 		frame.quad = raw(makeQuad(value.x, value.y, value.width, value.height))
+		frame.texture = raw("texture")
+
+		if rotated then
+			frame.angle = math.rad(270)
+		end
 
 		table.insert(frames, frame)
 
@@ -91,7 +93,7 @@ return function(path, save_to)
 		table.insert(tag, first_instance[key])
 	end
 
-	export:write("return " .. serialize_list(frames))
+	export:write("return " .. util.serialize_list(frames))
 
 	export:flush()
 	export:close()

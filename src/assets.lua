@@ -1,15 +1,25 @@
-local assets = {}
+local cache = {
+	images = {},
+	audio = {},
+	atlases = {}
+}
 
-function assets.image()
-	
+function cache:get(tag)
+
 end
 
-function assets.sound()
+function cache:atlas(tag)
 
 end
 
-function assets.string()
-	
+function cache:image(image, tag)
+	if self.images[tag] then return true end
+	self.images[tag] = image
+	return false
 end
 
-return assets
+function cache:audio(tag)
+
+end
+
+return cache

@@ -11,9 +11,12 @@ function sprite:_new(x, y, graphic)
 	self.x = x or 0
 	self.y = y or 0
 
+	self.flipX = false
+	self.flipY = false
+
 	self.transform = love.math.newTransform() ---@type love.Transform
 
-	self.scrollFactor = {0.5, 0.5}
+	self.scrollFactor = {1, 1}
 
 	self.color = {1, 1, 1}
 	self.alpha = 1
@@ -35,21 +38,6 @@ function sprite:_new(x, y, graphic)
 	-- I lowk gotta shake that belly!
 
 	self.animation = false
-end
-
-function sprite:setOrigin(...)
-	local values = {...}
-	local args = #values
-
-	-- fucked up and evil polymorphism
-	if args == 1 and type(values[1]) == "number" then
-		local dimensions = self.frames[values[1]].dimensions
-		self:set("origin", dimensions[1]/2, dimensions[2]/2)
-	elseif args == 2 then
-		self:set("origin", values[1], values[2])
-	elseif args == 0 then
-		self:set("origin", self.height/2, self.width/2)
-	end
 end
 
 function sprite:update(dt)
@@ -87,9 +75,10 @@ function sprite:render()
 
 	transform:translate(off_x, off_y)
 
-	local quad = self.quad
-
 	local frame = self.current_frame
+	local quad = self.quad
+	local graphic = self.graphic or _G.FALLBACK_GRAPHIC
+
 	if frame then
 		--relies that the spritesheet has the right angled offset
 		transform:translate(frame.offset[1], frame.offset[2])
@@ -98,38 +87,19 @@ function sprite:render()
 			transform:rotate(frame.angle)
 		end
 
-		quad = frame.quad or quad
+		quad = frame.quad or quad -- prioritize the framequad over the object's quad 
 	end
 
 	local r,g,b,a = graphics.getColor()
 	graphics.setColor(self.color[1], self.color[2], self.color[3], self.alpha)
 
 	if quad then
-		graphics.draw(self.graphic, quad, transform)
+		graphics.draw(graphic, quad, transform)
 	else
-		graphics.draw(self.graphic, transform)
+		graphics.draw(graphic, transform)
 	end
 
 	graphics.setColor(r,g,b,a)
-end
-
-function sprite:release()
-	if self.animation then
-		self.playing = false
-	end
-
-	self.transform:release()
-	self.graphic:release()
-
-	for key, value in ipairs(self.frames) do
-		value.quad:release()
-	end
-
-	self.active = false
-	self.visible = false
-
-	---@diagnostic disable-next-line: missing-fields
-	self = {}
 end
 
 -- as it turns out animation as a whole is easy enough to litterally just implement
@@ -153,5 +123,40 @@ function sprite:load_frames(path)
 	self:implement(animation)
 	self:setFrame(1)
 end
+
+function sprite:setOrigin(...)
+	local values = {...}
+	local args = #values
+
+	-- fucked up and evil polymorphism
+	if args == 1 and type(values[1]) == "number" then
+		local dimensions = self.frames[values[1]].dimensions
+		self:set("origin", dimensions[1]/2, dimensions[2]/2)
+	elseif args == 2 then
+		self:set("origin", values[1], values[2])
+	elseif args == 0 then
+		self:set("origin", self.height/2, self.width/2)
+	end
+end
+
+function sprite:release()
+	if self.animation then
+		self.playing = false
+
+		for key, value in ipairs(self.frames) do
+			value.quad:release()
+		end
+	end
+
+	self.transform:release()
+	self.graphic:release()
+
+	self.active = false
+	self.visible = false
+
+	---@diagnostic disable-next-line: missing-fields
+	self = {}
+end
+
 
 return sprite

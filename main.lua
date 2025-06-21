@@ -10,11 +10,10 @@ do -- setting up default require paths
 	love.filesystem.setRequirePath(paths)
 end
 
+
 _G.object = require("classic")
 
-_G.util = {
-	point = require("backend.point")
-}
+_G.util = require("util")
 
 _G.animation = require("backend.animation")
 _G.sprite = require("backend.sprite")
@@ -23,45 +22,23 @@ _G.text = require("backend.text")
 
 _G.audio = require("backend.audio")
 
+_G.battle_ui = require("battleUI")
+
 _G.parsers = {
 	json = require("json"),
 	xml = require("xml")
 }
 
 _G.converters = {
-	sparrow = require("coverters.sparrow")
+	sparrow = require("coverters.sparrow"),
+	aseprite = require("coverters.aseprite"),
 }
 
 _G.void = function()end
---edited version of https://stackoverflow.com/a/65632110/21846847
-function serialize_list(list)
-	local str = ''
-	str = str .. "{"
-	for key, value in pairs(list) do
-		local pr = (type(key) == "string") and ('["'..key..'"] = ') or ""
 
-		if type(value) == "table" then
-			str = str..pr..serialize_list(value)..', '
-		elseif type(value) == "function" then
-			str = str..pr..value(list, key)..', '
-		elseif type(value) == "string" then
-			if tonumber(value) ~= nil then
-				str = str..pr..'"'..tonumber(value)..'", '			
-			else
-				str = str..pr..'"'..tostring(value)..'", '
-			end
-		else
-			str = str..pr..tostring(value)..', '
-		end
-	end
-
-	str = str:sub(1, #str-2) -- remove last symbols
-	str = str.."}"
-	return str
-end
+_G.FALLBACK_GRAPHIC = love.graphics.newImage("fallback.png")
 
 local bf ---@type sprite
-local dad ---@type sprite
 
 local x = 0
 local y = 0
@@ -72,82 +49,22 @@ local c_x, c_y = 0, 0
 function love.load()
 	love.filesystem.setIdentity("colorsin_testing")
 
-	-- converters.sparrow("DADDY_DEAREST.xml", "DADDY_DEAREST.lua")
+	converters.sparrow("assets/battle_ui.xml", "battle_ui.lua")
 
-	bf = sprite:new(0, 0, love.graphics.newImage("BOYFRIEND.png"))
-	bf:load_frames("BOYFRIEND.lua")
-	bf:add_anim("idle"     , "BF idle dance", 24, false, {-5 ,  0})
-	bf:add_anim("singLEFT" , "BF NOTE LEFT" , 24, false, { 5 , -6})
-	bf:add_anim("singDOWN" , "BF NOTE DOWN" , 24, false, {-20, -51})
-	bf:add_anim("singUP"   , "BF NOTE UP"   , 24, false, {-46,  27})
-	bf:add_anim("singRIGHT", "BF NOTE RIGHT", 24, false, {-48, -7})
-
-	local idle_frames = bf.anims["idle"].frames
-	bf:setOrigin(idle_frames[#idle_frames])
-
-	bf:play_anim("idle")
-
-	---@type sprite
-	-- dad = sprite:new(0, 0, love.graphics.newImage("DADDY_DEAREST.png"))
-	-- dad:load_frames("DADDY_DEAREST.lua")
-	-- dad:add_anim("idle"     , "Dad idle dance"     , 24, false, { 0 ,  0})
-	-- dad:add_anim("singLEFT" , "Dad Sing Note LEFT" , 24, false, {-9 ,  10})
-	-- dad:add_anim("singDOWN" , "Dad Sing Note DOWN" , 24, false, { 0 , -30})
-	-- dad:add_anim("singUP"   , "Dad Sing Note UP"   , 24, false, {-6 ,  50})
-	-- dad:add_anim("singRIGHT", "Dad Sing Note RIGHT", 24, false, { 0 ,  27})
-
-	-- dad:play_anim()
-
-	-- idle_frames = dad.anims["idle"].frames
-	-- dad:setOrigin(idle_frames[#idle_frames])
-
-	-- dad:play_anim("idle")
+	battle_ui:init()
 
 	love.graphics.setNewFont(18)
 end
 
-local fuckedUp = false
-
 local elapsed = 0
 function love.update(dt)
-	bf:update(dt)
-	-- dad:update(dt)
-
-	if fuckedUp then
-		elapsed = elapsed + dt
-		bf:set("shear", math.sin(elapsed), math.cos(elapsed))
-		bf:set("scale", math.cos(elapsed), math.sin(elapsed))
-		bf.angle = bf.angle + math.rad(90) * dt
-
-		-- dad:set("shear", math.sin(elapsed), math.cos(elapsed))
-		-- dad:set("scale", math.cos(elapsed), math.sin(elapsed))
-		-- dad.angle = dad.angle + math.rad(90) * dt
-	end
+	battle_ui:update(dt)
 end
 
 function love.keypressed(key, scancode, isrepeat)
 	if isrepeat then return end
 
-	if key == "backspace" then
-		fuckedUp = not fuckedUp
-	end
 
-	if key == "left" then
-		bf:play_anim("singLEFT", true)
-		-- dad:play_anim("singLEFT", true)
-	elseif key == "right" then
-		bf:play_anim("singRIGHT", true)
-		-- dad:play_anim("singRIGHT", true)
-	elseif key == "down" then
-		bf:play_anim("singDOWN", true)
-		-- dad:play_anim("singDOWN", true)
-	elseif key == "up" then
-		bf:play_anim("singUP", true)
-		-- dad:play_anim("singUP", true)
-	elseif key == "space" then
-		bf:play_anim("idle", true)
-		-- dad:play_anim("idle", true)
-	end
 end
 
 function love.wheelmoved(x, y)
@@ -184,8 +101,7 @@ function love.draw()
 
 	graphics.translate(x, y)
 
-	bf:render()
-	-- dad:render()
+	battle_ui:render()
 
 	graphics.pop()
 
